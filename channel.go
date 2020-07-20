@@ -1371,9 +1371,10 @@ Publish with context can be used for canceling request and closing goroutine
 
 */
 func (ch *Channel) PublishWithContext(exchange, key string, mandatory, immediate bool, msg Publishing, ctx context.Context) error {
-	returnChannel := make(chan error)
+	returnChannel := make(chan error, 1)
+	defer close(returnChannel)
 	go func(ctx context.Context) {
-		resChannel := make(chan error)
+		resChannel := make(chan error, 1)
 		defer close(resChannel)
 		resChannel <- ch.Publish(exchange, key, mandatory, immediate, msg)
 		select {
